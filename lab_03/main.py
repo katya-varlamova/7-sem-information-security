@@ -215,7 +215,7 @@ def bits_to_int(arr):
         st *= 2
     return s
 
-def int_arr_to_bits64(i_arr):
+def int_arr_to_bits64(i_arr, action):
     extra = 0
     if len(i_arr) % 8 != 0:
         extra = 8 - len(i_arr) % 8
@@ -229,16 +229,23 @@ def int_arr_to_bits64(i_arr):
             bits_tmp = []
         bits_tmp += int_to_bits(i_arr[i])
     bits.append(bits_tmp)
+    if action == 'e':
+        with open("extra.txt", 'w') as f:
+            print(extra, file=f)
     return bits
 
-def bits64_to_int_arr(bits):
+def bits64_to_int_arr(bits, action):
     i_arr = []
     for b in bits:
         for i in range(8):
             i_arr.append(bits_to_int(b[i * 8: i * 8 + 8]))
+    if action == 'd':
+        with open("extra.txt") as f:
+            extra = int(f.read())
+            i_arr = i_arr[:len(i_arr) - extra]
     return i_arr
 def work(fn, action):
-    arr = int_arr_to_bits64(bytes_to_int_arr(read_bin_file(fn)))
+    arr = int_arr_to_bits64(bytes_to_int_arr(read_bin_file(fn)), action)
     
     key = load_key(sys.argv[1])
     keys = generate_keys(key)
@@ -250,7 +257,7 @@ def work(fn, action):
         if action == "d":
             c = decrypt(a, keys)
         res.append(c)
-    create_bin_file(sys.argv[3], int_arr_to_bytes(bits64_to_int_arr(res)))
+    create_bin_file(sys.argv[3], int_arr_to_bytes(bits64_to_int_arr(res, action)))
         
 
 load_blocks("blocks.txt")
